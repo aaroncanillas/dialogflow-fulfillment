@@ -352,101 +352,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 }
 
-  // Function for recommendation intent
-  // 
-  function GetRecommendation(agent) {
-    const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
-    console.log("query: " + query);
 
-    const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
-    });
+    // Input the recommended movie's here, using the fulfillment recommend based on the highest scoring category
 
-    let anime = parseInt(context[0].parameters.anime);
-    let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
-    let sitcom = parseInt(context[0].parameters.sitcom);
-    let western = parseInt(context[0].parameters.western);
-    let spiel = '';
-
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'parachuting':
-      case 'a. parachuting':
-        western++;
-        spiel = 'western';
-        break;
-      case '2':
-      case 'b':
-      case 'restaurant':
-      case 'b. restaurant':
-        romanticcomedy++;
-        spiel = 'romanticcomedy';
-        break;
-      case '3':
-      case 'c':
-      case 'escape room':
-      case 'c. escape room':
-        sitcom++;
-        spiel = 'sitcom';
-        break;
-      case '4':
-      case 'd':
-      case 'long walk':
-      case 'd. long walk':
-        anime++;
-        spiel = 'anime';
-        break;
-    }
-
-    const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
-    };
-
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
-
-  agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
-
-      const genreScores = new Map([
-      ["anime", anime],
-      ["romanticcomedy", romanticcomedy],
-      ["sitcom", sitcom],
-      ["western", western]
-    ]);
-
-    const maxScore = Math.max(...Array.from(genreScores.values()));
-
-    let selectedGenres = [];
-    genreScores.forEach((score, genre) => {
-      if (score === maxScore) {
-          selectedGenres.push(genre);
-      }
-  });
-
-    let recommendedGenre;
-    if (selectedGenres.length >= 2) {
-      const randomizer = Math.floor(Math.random() * selectedGenres.length);
-      recommendedGenre = selectedGenres[randomizer];
-    } else {
-      recommendedGenre = selectedGenres[0];
-    }
-
-    console.log(selectedGenres);
-    console.log(recommendedGenre);
-
-  agent.add(`Based on your preferences, I recommend you to watch ${recommendedGenre} movies!`);
-  
-}
+    // Hint: store the points in an array and get the biggest point using Math.Max()
 
 
   // Run the proper function handler based on the matched Dialogflow intent name
@@ -457,6 +366,5 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   intentMap.set('04.ChooseLocation', ChooseLocation);
   intentMap.set('05.BrainFeeling', BrainFeeling);
   intentMap.set('06.RatherDo', RatherDo);
-  intentMap.set('07.GetRecommendation', GetRecommendation);
   agent.handleRequest(intentMap);
 });

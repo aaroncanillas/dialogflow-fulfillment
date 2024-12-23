@@ -219,7 +219,7 @@ function SoundsGood(agent) {
 
   // Run the proper function handler based on the matched Dialogflow intent name
   let intentMap = new Map();
-  intentMap.set('00.GetStarted', GetStarted);
+  intentMap.set('00.0GetStarted', GetStarted);
   intentMap.set('02.HowAreYou', HowAreYou);
   intentMap.set('03.SoundsGood', SoundsGood);
   intentMap.set('06.RatherDo', MovieRecommendation);
