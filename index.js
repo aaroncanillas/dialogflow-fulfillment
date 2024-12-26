@@ -33,395 +33,339 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log("spiel: ", spiel); 
   }
 
-  // Function for 2nd Q: How are you feeling today?
-  // Scoring system implementation
-  // Done. Working
-  function HowAreYou(agent) {
-    const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
-    console.log("query: " + query);
-
+  function GetContext(contexts) {
     const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
+        console.log("debug flag: " + context.name);
+        return context.name === 'sessiondata';
     });
+    return context;
+  }
+  
+  // Function to load parameter values
+  function LoadParameterValues(context) {
+    if ( context.length === 0 ) {
+      console.error("No session data context found.");
+      return { anime: 0, romanticcomedy: 0, sitcom: 0, western: 0};
+    }
 
     let anime = parseInt(context[0].parameters.anime);
     let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
     let sitcom = parseInt(context[0].parameters.sitcom);
     let western = parseInt(context[0].parameters.western);
-    let spiel = '';
 
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'anime':
-      case 'anime🎌':
-      case 'a. Anime🎌':
-        anime++;
-        spiel = 'anime';
-        break;
-      case '2':
-      case 'b':
-      case 'romantic comedy':
-      case 'romantic comedy❤️':
-      case 'b. romantic comedy❤️':
-        romanticcomedy++;
-        spiel = 'romantic comedy';
-        break;
-      case '3':
-      case 'c':
-      case 'sitcom':
-      case 'c. sitcom':
-      case 'c. sitcom😂':
-        sitcom++;
-        spiel = 'sitcom';
-        break;
-      case '4':
-      case 'd':
-      case 'western':
-      case 'western🤠':
-      case 'd. western🤠':
-        western++;
-        spiel = 'western';
-        break;
+    return { anime, romanticcomedy, sitcom, western };
+  }
+
+  // Function to log scores
+  function LogScores(spiel, scores) {
+    console.log("spiel: " + spiel);
+    console.log("anime: " + scores.anime);
+    console.log("romantic comedy: " + scores.romanticcomedy);
+    console.log("sitcom: " + scores.sitcom);
+    console.log("western: " + scores.western);
+  }
+
+  // Function for 2nd Q: How are you feeling today?
+  function HowAreYou(agent) {
+    const query = agent.query.toLowerCase();
+    console.log("query: " + query);
+    let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
+
+    const animeChoices = ['1', 'a', 'anime', 'anime🎌', 'a. Anime🎌'];
+    const romcomChoices = ['2', 'b', 'romantic comedy', 'romantic comedy❤️', 'b. romantic comedy❤️'];
+    const sitcomChoices = ['3', 'c', 'sitcom', 'c. sitcom', 'c. sitcom😂'];
+    const westernChoices = ['4', 'd', 'western', 'western🤠', 'd. western🤠'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime += 2;
+    } else if (romcomChoices.includes(query)) {
+      scores.romanticcomedy += 2;
+    } else if (sitcomChoices.includes(query)) {
+      scores.sitcom += 2;
+    } else {
+      scores.western += 2;
     }
 
     const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
     };
 
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
+    LogScores(spiel, scores);
 
-  agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
+  agent.add(``); // Error if there is no agent.add()
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
 }
 
   // Function for 3rd Q: What sounds good about right now?
-  //
   function SoundsGood(agent) {
     const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
     console.log("query: " + query);
-
-    const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
-    });
-
-    let anime = parseInt(context[0].parameters.anime);
-    let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
-    let sitcom = parseInt(context[0].parameters.sitcom);
-    let western = parseInt(context[0].parameters.western);
     let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
 
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'awesome':
-      case 'a. awesome':
-        anime++;
-        spiel = 'anime';
-        break;
-      case '2':
-      case 'b':
-      case 'mysterious':
-      case 'b. mysterious':
-        romanticcomedy++;
-        spiel = 'romantic comedy';
-        break;
-      case '3':
-      case 'c':
-      case 'stressed':
-      case 'c. stressed':
-        sitcom++;
-        spiel = 'sitcom';
-        break;
-      case '4':
-      case 'd':
-      case 'chillin':
-      case 'd. chillin':
-        western++;
-        spiel = 'western';
-        break;
+    const animeChoices = ['1', 'a', 'awesome', 'a. awesome'];
+    const romcomChoices = ['2', 'b', 'mysterious', 'b. mysterious'];
+    const sitcomChoices = ['3', 'c', 'stressed', 'c. stressed'];
+    const westernChoices = ['4', 'd', 'chillin', 'd. chillin'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime++;
+    } else if (romcomChoices.includes(query)) {
+      scores.romanticcomedy++;
+    } else if (sitcomChoices.includes(query)) {
+      scores.sitcom++;
+    } else {
+      scores.western++;
     }
 
     const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
     };
 
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
+    LogScores(spiel, scores);
 
   agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
 }
 
   // Function for 4th Q: Choose a location
-  //
   function ChooseLocation(agent) {
     const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
     console.log("query: " + query);
-
-    const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
-    });
-
-    let anime = parseInt(context[0].parameters.anime);
-    let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
-    let sitcom = parseInt(context[0].parameters.sitcom);
-    let western = parseInt(context[0].parameters.western);
     let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
 
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'sweet':
-      case 'a. sweet':
-        romanticcomedy++;
-        sitcom++;
-        spiel = 'romantic comedy and sitcom';
-        break;
-      case '2':
-      case 'b':
-      case 'salty':
-      case 'b. salty':
-        romanticcomedy++;
-        anime++;
-        western++;
-        spiel = 'anime and western';
-        break;
+    const animeWesternChoices = ['2', 'b', 'salty', 'b. salty'];
+    const romcomSitcomChoices = ['1', 'a', 'sweet', 'a. sweet'];
+
+    if (animeWesternChoices.includes(query)) {
+      scores.anime++;
+      scores.western++;
+    } else {
+      scores.romanticcomedy++;
+      scores.sitcom++;
     }
 
     const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
     };
 
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
+    LogScores(spiel, scores);
 
   agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
 }
 
   // Function for 5th Q: How's your brain feeling right now?
-  // 
   function BrainFeeling(agent) {
     const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
     console.log("query: " + query);
-
-    const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
-    });
-
-    let anime = parseInt(context[0].parameters.anime);
-    let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
-    let sitcom = parseInt(context[0].parameters.sitcom);
-    let western = parseInt(context[0].parameters.western);
     let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
 
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'stay at home':
-      case 'a. stay at home':
-        anime++;
-        spiel = 'anime';
-        break;
-      case '2':
-      case 'b':
-      case 'castle':
-      case 'b. castle':
-        romanticcomedy++;
-        western++;
-        spiel = 'romantic comedy and western';
-        break;
-      case '3':
-      case 'c':
-      case 'forest':
-      case 'c. forest':
-        sitcom++;
-        spiel = 'sitcom';
-        break;
+    const animeChoices = ['1', 'a', 'stay at home', 'a. stay at home'];
+    const romcomWesternChoices = ['2', 'b', 'castle', 'b. castle'];
+    const sitcomChoices = ['3', 'c', 'forest', 'c. forest'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime++;
+    } else if (romcomWesternChoices.includes(query)) {
+      scores.romanticcomedy++;
+      scores.western++;
+    } else {
+      scores.sitcom++;
     }
 
     const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
     };
 
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
+    LogScores(spiel, scores);
 
   agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
 }
 
   // Function for 6th Q: What would you rather do?
-  // 
   function RatherDo(agent) {
     const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
     console.log("query: " + query);
-
-    const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
-    });
-
-    let anime = parseInt(context[0].parameters.anime);
-    let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
-    let sitcom = parseInt(context[0].parameters.sitcom);
-    let western = parseInt(context[0].parameters.western);
     let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
 
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'need simulation':
-      case 'a. need simulation':
-        anime++;
-        spiel = 'anime';
-        break;
-      case '2':
-      case 'b':
-      case 'dont want to think':
-      case 'b. dont want to think':
-        sitcom++;
-        spiel = 'sitcom';
-        break;
-      case '3':
-      case 'c':
-      case 'need distraction':
-      case 'c. need distraction':
-        romanticcomedy++;
-        spiel = 'romanticcomedy';
-        break;
-      case '4':
-      case 'd':
-      case 'need to feel something':
-      case 'd. need to feel something':
-        western++;
-        spiel = 'western';
-        break;
+    const animeChoices = ['1', 'a', 'need simulation', 'a. need simulation'];
+    const sitcomChoices = ['2', 'b', 'dont want to think', 'b. dont want to think'];
+    const romcomChoices = ['3', 'c', 'need distraction', 'c. need distraction'];
+    const westernChoices = ['4', 'd', 'need to feel something', 'd. need to feel something'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime++;
+    } else if (romcomChoices.includes(query)) {
+      scores.romanticcomedy++;
+    } else if (sitcomChoices.includes(query)) {
+      scores.sitcom++;
+    } else {
+      scores.western++;
     }
 
     const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
     };
 
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
+    LogScores(spiel, scores);
 
   agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
+}
 
+  // Function for 7th Q: What type of music sets your mood?
+  function TypeOfMusic(agent) {
+    const query = agent.query.toLowerCase();
+    console.log("query: " + query);
+    let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
+
+    const westernChoices = ['1', 'a', 'parachuting', 'a. parachuting'];
+    const romcomChoices = ['2', 'b', 'restaurant', 'b. restaurant'];
+    const sitcomChoices = ['3', 'c', 'escape room', 'c. escape room'];
+    const animeChoices = ['4', 'd', 'long walk', 'd. long walk'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime++;
+    } else if (romcomChoices.includes(query)) {
+      scores.romanticcomedy++;
+    } else if (sitcomChoices.includes(query)) {
+      scores.sitcom++;
+    } else {
+      scores.western++;
+    }
+
+    const parameters = {
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
+    };
+
+    LogScores(spiel, scores);
+
+  agent.add(``);
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
+}
+
+  // Function for 8th Q: What's your go-to snack during a movie?
+  function GoToSnack(agent) {
+    const query = agent.query.toLowerCase();
+    console.log("query: " + query);
+    let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
+
+    const animeChoices = ['1', 'a', 'epic beats', 'a. epic beats'];
+    const sitcomChoices = ['2', 'b', 'romantic pop', 'b. romantic pop'];
+    const romcomChoices = ['3', 'c', 'classics', 'c. classics'];
+    const westernChoices = ['4', 'd', 'country', 'd. country'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime++;
+    } else if (romcomChoices.includes(query)) {
+      scores.romanticcomedy++;
+    } else if (sitcomChoices.includes(query)) {
+      scores.sitcom++;
+    } else {
+      scores.western++;
+    }
+
+    const parameters = {
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
+    };
+
+    LogScores(spiel, scores);
+
+  agent.add(``);
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
 }
 
   // Function for recommendation intent
-  // 
   function GetRecommendation(agent) {
     const query = agent.query.toLowerCase();
-    const contexts = agent.contexts;
     console.log("query: " + query);
-
-    const context = contexts.filter(context => {
-      console.log("debug flag: " + context.name);
-      return context.name === 'sessiondata';
-    });
-
-    let anime = parseInt(context[0].parameters.anime);
-    let romanticcomedy = parseInt(context[0].parameters.romanticcomedy);
-    let sitcom = parseInt(context[0].parameters.sitcom);
-    let western = parseInt(context[0].parameters.western);
     let spiel = '';
+    let message = '';
+    
+    const context = GetContext(agent.contexts);
+    const scores = LoadParameterValues(context);
 
-    switch (query) {
-      case '1':
-      case 'a':
-      case 'parachuting':
-      case 'a. parachuting':
-        western++;
-        spiel = 'western';
-        break;
-      case '2':
-      case 'b':
-      case 'restaurant':
-      case 'b. restaurant':
-        romanticcomedy++;
-        spiel = 'romanticcomedy';
-        break;
-      case '3':
-      case 'c':
-      case 'escape room':
-      case 'c. escape room':
-        sitcom++;
-        spiel = 'sitcom';
-        break;
-      case '4':
-      case 'd':
-      case 'long walk':
-      case 'd. long walk':
-        anime++;
-        spiel = 'anime';
-        break;
+    const westernChoices = ['1', 'a', 'popcorn', 'a. popcorn'];
+    const romcomChoices = ['2', 'b', 'chocolate', 'b. chocolate'];
+    const sitcomChoices = ['3', 'c', 'chips', 'c. chips'];
+    const animeChoices = ['4', 'd', 'sushi', 'd. sushi'];
+
+    if (animeChoices.includes(query)) {
+      scores.anime++;
+    } else if (romcomChoices.includes(query)) {
+      scores.romanticcomedy++;
+    } else if (sitcomChoices.includes(query)) {
+      scores.sitcom++;
+    } else {
+      scores.western++;
     }
 
     const parameters = {
-      "anime": anime,
-      "romantic comedy": romanticcomedy,
-      "sitcom": sitcom,
-      "western": western
+      "anime": scores.anime,
+      "romantic comedy": scores.romanticcomedy,
+      "sitcom": scores.sitcom,
+      "western": scores.western
     };
 
-    console.log("spiel " +  spiel);
-    console.log("anime: " + anime);
-    console.log("romantic comedy: " + romanticcomedy);
-    console.log("sitcom: " + sitcom);
-    console.log("western: " + western);
+    LogScores(spiel, scores);
 
-  agent.add(``);
-  agent.setContext({ name: 'sessiondata', lifespan: 10, parameters: parameters });
+  agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
 
       const genreScores = new Map([
-      ["anime", anime],
-      ["romanticcomedy", romanticcomedy],
-      ["sitcom", sitcom],
-      ["western", western]
+      ["anime", scores.anime],
+      ["romanticcomedy", scores.romanticcomedy],
+      ["sitcom", scores.sitcom],
+      ["western", scores.western]
     ]);
 
     const maxScore = Math.max(...Array.from(genreScores.values()));
@@ -444,7 +388,34 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log(selectedGenres);
     console.log(recommendedGenre);
 
-  agent.add(`Based on your preferences, I recommend you to watch ${recommendedGenre} movies!`);
+    agent.add(`Based on your preferences, I recommend you to watch ${recommendedGenre} movies!`);
+
+    switch (recommendedGenre) {
+      case 'anime':
+        agent.add('Great choice! Here are some popular anime movie recommendations:');
+        agent.add('Attack On Titan ⚔');
+        agent.add('Your Name 🌟');
+        agent.add('Spirited Away 🐉');
+        break;
+      case 'romanticcomedy':
+        agent.add('Romantic comedies are always a fun watch! Check these out:');
+        agent.add('Crazy, Stupid, Love 💖');
+        agent.add('The Proposal 💍');
+        agent.add('10 Things I Hate About You 🎭');
+        break;
+      case 'sitcom':
+        agent.add('Sitcoms are perfect for a good laugh! Here are some great movies:');
+        agent.add('Friends 🛋');
+        agent.add('The Office 🪑');
+        agent.add('Modern Family 👩‍👩‍👧‍👧');
+        break;
+      case 'western':
+        agent.add('Westerns are always thrilling! Here are some classics:');
+        agent.add('The Good, The Bad, and The Ugly 🤠');
+        agent.add('Django Unchained 🔫');
+        agent.add('True Grit 🐴');
+        break;
+    }
   
 }
 
@@ -457,6 +428,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   intentMap.set('04.ChooseLocation', ChooseLocation);
   intentMap.set('05.BrainFeeling', BrainFeeling);
   intentMap.set('06.RatherDo', RatherDo);
-  intentMap.set('07.GetRecommendation', GetRecommendation);
+  intentMap.set('07.TypeOfMusic', TypeOfMusic);
+  intentMap.set('08.GoToSnack', GoToSnack);
+  intentMap.set('09.GetRecommendation', GetRecommendation);
   agent.handleRequest(intentMap);
 });
