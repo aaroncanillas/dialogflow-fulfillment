@@ -13,26 +13,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
-  // Get started intent
-  function GetStarted(agent) {
-    const query = agent.query.toLowerCase();
-    let spiel = null;
-
-    console.log("query: ", query);
-
-    if (query.includes('special')) {
-        spiel = `Amazing! You're looking for something extraordinary! Let's get started then. 🎬`;
-    }
-    else {
-        spiel = `Great choice! Let's find something awesome for you. 🍿`;
-    }
-
-    agent.add(spiel);
-    agent.add(`What is your name?`);
-
-    console.log("spiel: ", spiel); 
-  }
-
   function GetContext(contexts) {
     const context = contexts.filter(context => {
         console.log("debug flag: " + context.name);
@@ -68,22 +48,68 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
   // Welcome Function
   function Welcome(agent) {
-    // Get the full context names from the output contexts
+    // https://github.com/dialogflow/dialogflow-fulfillment-nodejs/issues/71
     console.log("Agent contexts: ", agent.contexts);
 
-    // nagiging 5 ang lifespan ng context
-    // agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
     agent.contexts.forEach(context => {
       agent.setContext({
         name: context.name,
         lifespan: '0',
         parameters: {}
       });
-      console.log(`Cleared the context: ${context.name}`);
+      console.log(`cleared the context: ${context.name}`);
     });
 
-    agent.add("hello back");
-  }
+    agent.add("What's up! I'm ShowBro, your go-to movie rec guru. Let's get watching!");
+    agent.add("Are you ready to find your next movie?");
+
+    // Facebook Responses
+    agent.add({
+        imageUrl: "https://i.imgur.com/RX1s3pw.jpeg",
+        platform: "FACEBOOK" 
+    });
+    agent.add({
+        quickReplies: {
+            title: "Choose an option below to get started!",
+            quickReplies: ["Something special", "Any recommendation"]
+        },
+        platform: "FACEBOOK"
+
+    // Telegram Responses
+    });
+    agent.add({
+        imageUrl: "https://i.imgur.com/RX1s3pw.jpeg",
+        platform: "TELEGRAM" 
+    });
+    agent.add({
+        quickReplies: {
+            title: "Choose an option below to get started!",
+            quickReplies: ["Something special", "Any recommendation"]
+        },
+        platform: "TELEGRAM"
+    });
+}
+
+    // Get started intent
+  function GetStarted(agent) {
+    const query = agent.query.toLowerCase();
+    let spiel = null;
+
+    console.log("query: ", query);
+
+    if (query.includes('special')) {
+        spiel = `Amazing! You're looking for something extraordinary! Let's get started then. 🎬`;
+    }
+    else {
+        spiel = `Great choice! Let's find something awesome for you. 🍿`;
+    }
+
+    agent.add(spiel);
+    agent.add(`What is your name?`);
+
+    console.log("spiel: ", spiel); 
+}
+
 
   // Function for 2nd Q: How are you feeling today?
   function HowAreYou(agent) {
