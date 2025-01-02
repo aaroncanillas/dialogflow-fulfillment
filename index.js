@@ -39,6 +39,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         return context.name === 'sessiondata';
     });
     return context;
+
   }
   
   // Function to load parameter values
@@ -63,6 +64,25 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log("romantic comedy: " + scores.romanticcomedy);
     console.log("sitcom: " + scores.sitcom);
     console.log("western: " + scores.western);
+  }
+
+  // Welcome Function
+  function Welcome(agent) {
+    // Get the full context names from the output contexts
+    console.log("Agent contexts: ", agent.contexts);
+
+    // nagiging 5 ang lifespan ng context
+    // agent.setContext({ name: 'sessiondata', lifespan: 15, parameters: parameters });
+    agent.contexts.forEach(context => {
+      agent.setContext({
+        name: context.name,
+        lifespan: '0',
+        parameters: {}
+      });
+      console.log(`Cleared the context: ${context.name}`);
+    });
+
+    agent.add("hello back");
   }
 
   // Function for 2nd Q: How are you feeling today?
@@ -411,7 +431,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             randomIndex2 = Math.floor(Math.random() * movie.length);
         }
 
-        return [movie[randomIndex1], movie[RandomIndex2]];
+        return [movie[randomIndex1], movie[randomIndex2]];
     }
 
     agent.add(`Based on your preferences, I recommend you to watch ${recommendedGenre} movies!`);
@@ -449,6 +469,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
   // Run the proper function handler based on the matched Dialogflow intent name
   let intentMap = new Map();
+  intentMap.set('Default Welcome Intent', Welcome);
   intentMap.set('00.0GetStarted', GetStarted);
   intentMap.set('02.HowAreYou', HowAreYou);
   intentMap.set('03.SoundsGood', SoundsGood);
