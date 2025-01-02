@@ -388,32 +388,59 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log(selectedGenres);
     console.log(recommendedGenre);
 
+    // Movie Choice Recommendations
+    const animeMovies = ["Your Name 🌌", "Spirited Away 🐉", "Akira 🏍️", "My Neighbor Totoro 🌳", 
+        "Princess Mononoke 🐺", "A Silent Voice 🎧", "Ghost in the Shell 🤖", "Howl's Moving Castle 🏰", 
+        "Perfect Blue 🎥", "Paprika 🌈"];
+    const romcomMovies = ["Crazy Rich Asians 💰", "10 Things I Hate About You 💌", "When Harry Met Sally 🗽", 
+        "Notting Hill 📚", "The Proposal 💍", "Love Actually 🎄", "50 First Dates 🌺", 
+        "Silver Linings Playbook 🏆", "Bridget Jones's Diary 📖", "To All the Boys I've Loved Before ✉️"];
+    const sitcomMovies = ["The Grand Budapest Hotel 🏨", "Ferris Bueller's Day Off 🚗", "Clueless 🛍️", 
+        "Dumb and Dumber 🧢", "The 40-Year-Old Virgin 🎮", "Mean Girls 🎀", "Napoleon Dynamite 🦙", 
+        "Superbad 🍺", "Step Brothers 🛏️", "Anchorman: The Legend of Ron Burgundy 🎤"];
+    const westernMovies = ["The Good, the Bad, and the Ugly 🔫", "Unforgiven 🤠", "Django Unchained 🔗", 
+        "True Grit 🐎", "The Magnificent Seven 🤵‍♂️", "Once Upon a Time in the West 🚂", 
+        "Tombstone ⚰️", "No Country for Old Men 💼", "3:10 to Yuma ⏰", "The Searchers 🔍"];
+    
+    // sample snippet
+    function getMovies(movie) {
+        let randomIndex1 = Math.floor(Math.random() * movie.length);
+        let randomIndex2 = Math.floor(Math.random() * movie.length);
+
+        while (randomIndex1 === randomIndex2) {
+            randomIndex2 = Math.floor(Math.random() * movie.length);
+        }
+
+        return [movie[randomIndex1], movie[RandomIndex2]];
+    }
+
     agent.add(`Based on your preferences, I recommend you to watch ${recommendedGenre} movies!`);
 
+    let movieRecommendation;
     switch (recommendedGenre) {
       case 'anime':
+        movieRecommendation = getMovies(animeMovies);
         agent.add('Great choice! Here are some popular anime movie recommendations:');
-        agent.add('Attack On Titan ⚔');
-        agent.add('Your Name 🌟');
-        agent.add('Spirited Away 🐉');
+        agent.add(`${movieRecommendation[0]}`);
+        agent.add(`${movieRecommendation[1]}`);
         break;
       case 'romanticcomedy':
+        movieRecommendation = getMovies(romcomMovies);
         agent.add('Romantic comedies are always a fun watch! Check these out:');
-        agent.add('Crazy, Stupid, Love 💖');
-        agent.add('The Proposal 💍');
-        agent.add('10 Things I Hate About You 🎭');
+        agent.add(`${movieRecommendation[0]}`);
+        agent.add(`${movieRecommendation[1]}`);
         break;
       case 'sitcom':
+        movieRecommendation = getMovies(sitcomMovies);
         agent.add('Sitcoms are perfect for a good laugh! Here are some great movies:');
-        agent.add('Friends 🛋');
-        agent.add('The Office 🪑');
-        agent.add('Modern Family 👩‍👩‍👧‍👧');
+        agent.add(`${movieRecommendation[0]}`);
+        agent.add(`${movieRecommendation[1]}`);
         break;
       case 'western':
+        movieRecommendation = getMovies(westernMovies);
         agent.add('Westerns are always thrilling! Here are some classics:');
-        agent.add('The Good, The Bad, and The Ugly 🤠');
-        agent.add('Django Unchained 🔫');
-        agent.add('True Grit 🐴');
+        agent.add(`${movieRecommendation[0]}`);
+        agent.add(`${movieRecommendation[1]}`);
         break;
     }
   
