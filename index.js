@@ -90,7 +90,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     });
 }
 
-    // Get started intent
+  // Get started intent
   function GetStarted(agent) {
     const query = agent.query.toLowerCase();
     let spiel = null;
@@ -448,7 +448,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         "True Grit 🐎", "The Magnificent Seven 🤵‍♂️", "Once Upon a Time in the West 🚂", 
         "Tombstone ⚰️", "No Country for Old Men 💼", "3:10 to Yuma ⏰", "The Searchers 🔍"];
     
-    // sample snippet
+    // Get two unique movies
     function getMovies(movie) {
         let randomIndex1 = Math.floor(Math.random() * movie.length);
         let randomIndex2 = Math.floor(Math.random() * movie.length);
@@ -460,6 +460,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         return [movie[randomIndex1], movie[randomIndex2]];
     }
 
+    // Get snack_type parameter
+    const snackType = agent.parameters.snack_type;
+
+    agent.add(`So, your go-to movie snack is ${snackType}! A solid choice!`);
     agent.add(`Based on your preferences, I recommend you to watch ${recommendedGenre} movies!`);
 
     let movieRecommendation;
